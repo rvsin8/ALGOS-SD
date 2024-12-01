@@ -47,3 +47,5 @@ function climbing_stairs(n) {
     };
     return nArray[n]
 };
+
+console.log(climbing_stairs(3));
