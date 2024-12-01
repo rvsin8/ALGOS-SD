@@ -1,6 +1,5 @@
 /*
 '''
-❓ PROMPT
 When climbing flights of stairs, sometimes a person takes one step at a time, sometimes two steps at a time, skipping a position. In other situations, someone may sometimes take one step and other times skip a step, intermingling them.
 
 If one only ever moves one or two steps at a time, what are the number of unique ways to climb a flight of N stairs?

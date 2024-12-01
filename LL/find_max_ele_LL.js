@@ -8,7 +8,6 @@ Examples:
 • Given a linked list: 1  // returns 1
 
 */
-
 class ListNode {
     constructor(value = 0, next = null) {
         this.value = value
