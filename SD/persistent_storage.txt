@@ -285,7 +285,7 @@ The key aspects of a transaction are **atomicity, consistency, durability, and i
 
 In the previous unit, the Advertiser and Ads data system was a good example of an object model. Lets look at another data model known as the “Graph Data Model” and how we can use relational databases to implement this data model to represent nodes and edges
 
-Graph Data Model
+**Graph Data Model**
 
 Consider a social network where users have other friends, followers and posts.
 
@@ -293,13 +293,54 @@ Consider a social network where users have other friends, followers and posts.
 - Users can be friends with other users. This is a bidirectional edge, which means if A is a friend of B, B is a friend of A too
 - Users can follow other users. This is a unidirectional edge, A following B does not mean that B follows A too.
 
-Modeling Graphs in Relational DBs
+**Modeling Graphs in Relational DBs**
 
-How would we model this graph in a relational DB?
+**How would we model this graph in a relational DB?**
 
 First, every node will have its own table. So here, we would have 2 node tables, User and Post.
 
-Next, the User <-> Post mapping is a one to many relationship and therefore the post table can have a ***foreign key*** for its author pointing to User ID.Following the above two points here is what the User table and Post Table would look like:
+Next, the User <-> Post mapping is a one to many relationship and therefore the post table can have a ***foreign key*** for its author pointing to User ID. Following the above two points here is what the User table and Post Table would look like:
+
+The graph data model is a way to represent relationships (edges) and entities (nodes). Here's how this model is applied to a relational database using a **social network** example:
+
+**Nodes as Tables**
+
+**Users**: Each user is a node, so we use a `User` table.
+
+- **Columns**:
+    - `ID` (Primary Key)
+    - `First Name`, `Last Name`, `Country`, `Currency`
+
+**Example**:
+
+```sql
+sql
+Copy code
+| ID  | First Name | Last Name | Country  | Currency |
+|-----|------------|-----------|----------|----------|
+| 1   | Alice      | Smith     | USA      | USD      |
+| 2   | Bob        | Johnson   | Canada   | CAD      |
+
+```
+
+**Posts**: Each post is another node, linked to a user by a foreign key `Author_id`.
+
+- **Columns**:
+    - `ID` (Primary Key)
+    - `Author_id` (Foreign Key referencing `User.ID`)
+    - `Post Text`
+
+**Example**:
+
+```lua
+lua
+Copy code
+| ID  | Author_id | Post Text           |
+|-----|-----------|---------------------|
+| 1   | 1         | Hello, world!       |
+| 2   | 2         | Exploring Canada!   |
+
+```
 
 | Column 1 | Column 2 | Column 3 | Column 4 | Column 5 |
 | --- | --- | --- | --- | --- |
@@ -308,6 +349,29 @@ Next, the User <-> Post mapping is a one to many relationship and therefore the 
 | Column 1 | Column 2 | Column 3 |
 | --- | --- | --- |
 | ID | Author_id (Foreign Key to ID column of the User table) | Post Text |
+
+**Edges as Tables**
+
+**User Relationships**:
+
+- Represent **many-to-many relationships** (e.g., friendships and follows) in a separate **Edge Table**.
+- **Columns**:
+    - `From_ID` (Foreign Key referencing `User.ID`)
+    - `To_ID` (Foreign Key referencing `User.ID`)
+    - `Edge Type` (e.g., `FRIEND`, `FOLLOWS`)
+
+**Example**:
+
+```vbnet
+vbnet
+Copy code
+| From_ID | To_ID | Edge Type |
+|---------|-------|-----------|
+| 1       | 2     | FRIEND    |
+| 2       | 1     | FRIEND    |
+| 1       | 3     | FOLLOWS   |
+
+```
 
 The friends and following edges represent many to many relationships. One way of representing many to many relationships is to have a ***separate edge table*** to represent those edges. The edge table can have one column as the **from_node**, the other one as **to_node** and one column that mentions the edge type. For example with respect to the diagram above we could have:
 
@@ -322,3 +386,297 @@ There are some discussions on whether to have a separate table for each edge typ
 
 - One general consensus is that if we expect to introduce new edge types all the time, have a separate table for each might become a big overhead in terms of schema changes and so on.
 - If each edge table has a lot of metadata that itself might need structure, then maybe it's okay to have one table per edge type.
+
+**Design Considerations**
+
+1. **One Table for All Edge Types**:
+    
+    Use a single table for relationships (e.g., `Edge Type` column distinguishes between `FRIEND` or `FOLLOWS`).
+    
+    **Pros**: Easier to manage schema changes when adding new edge types.
+    
+    **Cons**: A large table can become less performant as data grows.
+    
+2. **Separate Tables for Each Edge Type**:
+    
+    Create a different table for each relationship type (e.g., `Friends Table`, `Follows Table`).
+    
+    **Pros**: Allows better structuring if each relationship type has its own metadata.
+    
+    **Cons**: Inflexible for frequently changing or new edge types.
+    
+
+The purpose of this excerpt is to explain how to model a **Graph Data Model** (nodes and edges) in a **Relational Database** using a **social network** example, with a focus on:
+
+1. **Nodes as Tables**: Represent entities (e.g., Users and Posts) as relational tables with columns for attributes and foreign keys for relationships.
+2. **Edges as Tables**: Represent relationships (e.g., friendships and follows) as separate tables to handle many-to-many connections, using columns for source, target, and relationship type.
+3. **Design Considerations**
+    
+    **Single Table for All Edges**: Simplifies schema management but may affect performance with large datasets.
+    
+    **Separate Tables for Each Edge Type**: Offers better structure for metadata-heavy relationships but is less flexible for frequent schema changes.
+    
+
+**Non-Relational Database**
+
+We saw an introduction to non-relational databases in the previous unit. Let’s dig into some more concepts pertaining to these systems in a little more detail.
+
+**Key Concepts and Example**
+
+**Schema-Less/Flexible Data Model**:
+
+**Structure**: Non-relational databases, like key-value stores or document databases, do not follow strict schemas. The "value" is a blob (e.g., JSON), allowing the structure to evolve dynamically.
+
+**Example**: A user metadata system:
+
+```json
+json
+Copy code
+{
+  "User_ID_1": {
+    "First_name": "Foo",
+    "Last_name": "Bar",
+    "Location": "SF",
+    "Interests": ["Tech", "Music"]
+  }
+}
+
+```
+
+New fields (like "Interests") can be added without modifying a predefined schema.
+
+**Why Use It?**
+
+- New fields can be added anytime without downtime or schema migrations.
+- Perfect for use cases like user profiles where fields change often.
+
+**Advantages**
+
+1. **Flexibility**:
+    - Rapidly evolving systems can adjust without requiring schema updates, reducing downtime and accelerating development.
+    - Ideal for unstructured or semi-structured data.
+    - **Example**: Product catalogs with varying attributes like size, weight, or color.
+2. **Performance**:
+    - Faster writes since there are no schema validations or foreign key checks.
+    - They are optimized for fast insertions.
+    - **Example**: Logging systems where speed is critical.
+    
+    **Not Good For**:
+    
+    - **Complex relationships** (e.g., joins between tables).
+    - **Strong consistency or transaction-heavy systems** (e.g., banking).
+
+**Flexible Data Model/Schema-less**
+
+In general, non-relational databases work like key-value stores. They do not store data in rows and columns like the way relational databases store data. Rather, the value is usually a data blob, meaning it can have a fuzzy structure that changes from time to time. This way, the data is not tied down to a strict schema.
+
+Let's look at an example. Let's assume, we have a database that stores metadata about a user. Metadata could be first name, last name, location, and email.
+
+The system allows users to view their data, edit their data and also new users to add their data.
+
+Now, we can imagine that with a system like this, there will always be an opportunity to include more and more metadata. For example, it's possible that a little later down the line we add date of birth, interests, educational background, professional background, etc.
+
+Now if this system was modeled with a relational database, then every time a new field was added, we would have to change the entire schema of the table and apply the schema to the database before it could be used. This could mean slower development time, database downtime, and if it happens often enough, it could really slow things down (both development-wise and performance-wise). Therefore, in this case, a good choice would be to have a key-value store or a document database whose key would be the ID of the user and value would be a JSON block of all the information.
+
+```
+{
+  "User_ID_1": {
+    "First_name": "Foo",
+    "Last_name": "Bar",
+    "Location": "SF",
+    ...
+  },
+  ...
+}
+
+```
+
+In a schema-less model:
+
+1. **Key** acts like a unique identifier (like a locker number).
+2. **Value** is the data stored (like the contents of the locker), often represented as a JSON object or blob, allowing dynamic and varying structures.
+
+Imagine a **relational database** as a vending machine. Each slot in the machine is predefined (rows and columns), e.g., slot "A1" for "Chips". If you want to sell a new product, you'd need to redesign the machine to add a new slot.
+
+Now imagine a **schema-less database** as a storage shelf. You can put any item in any spot without modifying the shelf. Need to store chips today and umbrellas tomorrow? No problem—it’s flexible and quick.
+
+**Relational Database Challenge**: Schema change required—time-consuming and may cause downtime.
+**Schema-less Solution**: Simply add new fields to the JSON blob for that user without impacting others.
+
+**Example Scenario:**
+
+- A database tracks user metadata (name, location, etc.).
+- Initially: Only basic fields like name, location.
+- Later: New fields like date of birth or professional background are added.
+
+**Pros**
+
+- **Flexibility of data model**: We are not bogged down by strict schemas and painful schema changes. Fast evolving systems benefit hugely from this. Evolving systems benefit as developers can add new fields without schema migrations.
+    
+    Analogy: It’s like using a whiteboard where you can add or erase notes easily, compared to a printed page where changes require reprinting.
+    
+- **Faster writes:** Non-relational databases perform better in general during writes. Imagine not having to validate the data schema, data types, foreign keys, etc. No schema validation means data gets written quickly.
+    
+    Analogy: Like skipping security checks at the airport—faster but less regulated.
+    
+
+**Cons**
+
+- **Increased possibility of corruption**: Since the data is simply a blob, it's possible for bad data to get in if not handled by the application code correctly. For example, at a DB level, there is no check for what the JSON keys are.
+    
+    No enforced schema means invalid or inconsistent data may sneak in.
+    
+    Analogy: Like leaving a shelf unorganized; if someone puts a shoe in a cereal box, you’ll only notice later.
+    
+- **Less clarity and data organization:** If you look at a relational table, just a glance at the schema can tell you what the data would look like. However, in a non-relational DB, that's very hard to tell because in theory, every JSON blob of different data points could have a different set of keys in them.
+    
+    Unlike relational schemas, where data relationships are clear, schema-less databases can appear chaotic.
+    
+- **No support for join queries**: Since the data is unstructured, if your system has queries that need to join multiple non-relational tables, the query performance could be poor. In the above example, let's assume you have another key-value store of locations keyed by ID, like this: Now if the User metadata has a location pointing to this ID (instead of the name string), then for a query like “Give me all users in San Francisco”, you would have to parse through all the users’ information and one by one, match it with the above table to get the result. This would be something a relational database would do much better with joins.
+    
+    **No optimized joins**: You manually match related data (e.g., user locations from another table).
+    
+- **No support for range and comparison queries**. Imagine we had a query that wanted to find all users born after a certain date. NoSQL databases cannot optimize this query and will have to scan all the rows to get the result, whereas relational databases would have no problems doing this optimally.
+    
+    **Limited range queries**: Scanning all data to filter (e.g., finding users born after 2000).
+    
+
+**Question: Does this mean that we can never have validation on the structure of data when we use non-relational databases?**
+
+We can, but that will most likely have to be done in the application code. The application should validate the structure while writing or reading from the database and then handle errors accordingly. This is why these systems are also called as “**Schema on Read**”.
+
+**Example**: Imagine a library without a catalog. When a user asks for a book, the librarian must check every shelf to find it. Validation occurs at the time of the query, not during storage.
+
+**Transactional Support/BASE**
+
+In general, document databases or non-relational databases are meant for single object reads and writes. They are built for blazing fast writes and for scaling horizontally. This means that generally they are not built to support “transactions” across objects or multiple operations. Supporting transactions consumes time and resources. Think about starting a logical transaction and then all the work you need to do for locking and to make sure all the operations within the transaction are complete and if not, all the rollback operations that need to be done, etc. Non-relational databases work best for use cases where transactional support is not needed across objects and operations.
+
+Therefore, non-relational databases do not inherently support the ACID properties that relational databases do.
+
+Instead of ACID, another term has been coined for non-relational databases called **BASE**. Base stands for **basically available, soft state and eventual consistency**. 
+
+- Atomicity: Transactions are all-or-nothing.
+- Consistency: Database remains valid after transactions.
+- Isolation: Concurrent transactions don’t interfere.
+- Durability: Data is saved permanently.
+
+**Non-Relational Databases (BASE):**
+
+- **Basically Available**: The system is always responsive.
+- **Soft State**: Data may not be immediately consistent.
+- **Eventual Consistency**: Consistency is achieved eventually, not instantly.
+
+**Reason for BASE**: NoSQL databases prioritize speed and scalability over strict consistency, fitting scenarios where perfect data synchronization isn't critical (e.g., social media feeds).
+
+**Question: So is it not possible to support transactions over multiple objects in a non-relational database?**
+
+No, it is totally possible to have transaction support in a non-relational database. However, since they were not made with an intention to support transactions, they usually don't have “native” support for this. Therefore, typically the way to do that would be to run another layer of middleware on top of the non-relational database that does the transaction management for the application.
+
+For example:
+
+- **OMID** is a system that helps support transactions on HBase (which natively does not support multi-object transactions)
+- Some non-relational databases, like **MongoDB**, have introduced support for multi-document transactions.
+
+So now that we have seen relational and non-relational databases, let us list out some of the things we need to look out for while selecting the right type of DB for our system.
+
+**Question: Is it true that “most” simple use cases can be implemented using relational databases?**
+
+In general, it is mostly true that most simple use cases will work with relational DBs. However, the key thing to note here is that relational DBs might not be the best fit for your system and in some cases might be ***extremely suboptimal*** and lead to a degraded and poor performance.
+
+If we wanted to understand this briefly, imagine we have a system that allows users to simply view and update their own names. This system needs to be able to support billions of users and a very high write/update traffic. The system also needs to scale horizontally to support more and more traffic.
+
+Now, if we use a relational database, we are trading off high write performance in order to get transactional support. However, this system does not need transactional support (no multi object writes per operation) and therefore we would be giving away write performance for something we don't really need at all.
+
+Secondly, this simplistic system does not *need* data to be stored in structured columns (since it's simply just the name) and read queries don't require complex joins (since you only read by user ID). Therefore, using relational databases don't give us any more advantage with read queries and unnecessarily might slow us down with unneeded strict schemas and system downtime when schema changes need to be propagated to the database.
+
+**Selecting Between the Two**
+
+So the question is, how do we select the right storage system for our system? To get a more thorough understanding of this, we need to answer a set of questions about the system in a way that tells us if we can benefit from the pros of each option and are okay to trade off the cons of that particular option. Here are some of them.
+
+If your queries frequently involve joins or analyzing relationships between entities, go with a relational DB.
+
+ If the data schema is dynamic and unpredictable, non-relational DBs provide the flexibility you need.
+
+**What are the entities that we will be storing and retrieving from the database? Are these entities strongly connected to each other? In other words, do they have relationships with each other?**
+
+In the above example, the only entity our system had was the user. Users have no relation to each other, and each user simply updates or views their own information.
+
+Contrast this with the system that we discussed previously, the advertiser and ads data system, where we see a strong relationship among entities.
+
+Therefore, if entities in a database have relationships with each other, a relational database would be a better fit for the system. Here, the advertiser system would benefit from a relational database whereas the user meta data would not really benefit from it.
+
+**Is the structure of the data your system stores continuously evolving? Do you foresee more fields/attributes being added and removed all the time?**
+
+We can imagine that the advertiser and ads data system is fairly structured. We might add attributes to the entities from time to time but it is not going to happen frequently. On the other hand, it's possible that the user metadata system keeps evolving in the data it stores. It may store names today but in the near future it's totally possible that we add more data like location, email, phone, birthdays, etc. Such systems that change continuously might not want to be bogged down by strict predefined schemas, and slow schema changes that cause downtime. They benefit better with non-relational databases.
+
+**Even if there are relationships between entities, do we need strong transactional support while editing and reading these entities? Are operations done on several connected entities together?**
+
+Now let's assume we have a social network where users can be friends with other users.
+
+https://codahosted.io/docs/dD_gKH7E1I/blobs/bl-EHONoCpIUi/abe84a8efdf86a183037840a8703fa42afbe57a13ff047be68bd8a35a1ce1b069a4dc4b9a1699ef09bd49971d25eb0029a5eb91d20876c022019afeb39a294d3d2ff6b66736858bec0f8f0e76c3acc4c441937a8f16b206e10eac2e2aa49d9247cda4a62
+
+Here, there are entities that have relationships with each other. It may be tempting to straight away choose a relational DB. However, we will probably ***never*** see a case where multiple of these entities and relationships are created as ***part of the same operation.*** Users usually create their own entities, and then friendship relations are created individually and separately at a later point in time.
+
+To be more clear, we probably will not have cases where we want to create multiple users as well as friendship connections *in one go*. Furthermore, we won't have atomicity constraints where the entities and relationships all need to be created at once and if one relationship fails to be created, all the other entities need to be rolled back/deleted. Such systems benefit from non-relational databases because they don't need ACID support and can also benefit from much faster writes and ***much better scaling,*** which is what we would want from a social network.
+
+On the other hand, the advertiser system may require that a campaign and a set of ads under it are all created ***in one operation.*** Failure to create the campaign entity should result **in no ads** getting created. Also, advertiser entities don't scale as fast as user entities in general, and so we are not bogged down by slightly slow writes. On the other hand, we do need the ACID support and therefore a relational database in general would do well here.
+
+- **Entities and Relationships**: Users and friendships between users.
+- **Operation Characteristics**:
+    - Users create their profiles individually.
+    - Friendships are established later and independently.
+    - There is no need to batch-create multiple users and their friendship links in a single operation.
+    - A failure to create a friendship link doesn’t require rolling back any user entities.
+
+**In this case**:
+
+- There’s no dependency on **strong transactional support** for operations spanning multiple entities.
+- **Non-relational databases** excel here because:
+    1. **Faster Writes**: The system avoids the overhead of ACID compliance.
+    2. **Scalability**: Social networks often need to scale horizontally to accommodate billions of users and high write traffic.
+    3. **Dynamic Schema**: User profiles may evolve (e.g., adding hobbies or custom statuses), which schema-less systems handle gracefully.
+
+**What kind of read queries is the system going to support? Do we have “point” queries that don't require complex joins, or do we have queries requiring joins all the time?**
+
+Point queries are queries that have simple constraints and don't require us to join data from multiple tables to get the results. For example, in the user metadata systems, all that the user can do is read their data given their ID and update their own data with the help of their ID. There is no real need for one user to query other users' information. Non-relational databases would work for such systems because they support blazing fast point queries.
+
+On the other hand, the advertiser system does need to answer questions like “give us all the campaigns and ads of this advertiser”. Automatically, this would mean that we would have to join data from the campaigns and ads tables. In general, non-relational databases perform very poorly with joins. Remember, there is no structured set of columns and no concept of foreign keys, so the database wouldn’t be able to perform joins optimally. On the other hand, relational databases do really well with joins since the database knows the structure of the table well and can benefit from the indexes it has created for primary and foreign keys (We will talk about indexes in future chapters in more detail). Such cases benefit greatly from relational databases.
+
+- **Entities and Relationships**: Advertisers, campaigns, and ads.
+- **Operation Characteristics**:
+    - A campaign creation might involve batch-creating multiple ads.
+    - Failure to create a campaign should roll back all associated ads.
+    - Advertisers and their campaigns have tightly connected data relationships.
+
+**In this case:**
+
+- **Transactional atomicity** is critical:
+    - You don’t want partial data (e.g., campaigns created without ads) due to failures.
+- **Relational databases** excel here because:
+    1. **ACID Properties**: Ensure the atomicity, consistency, isolation, and durability of these operations.
+    2. **Complex Queries**: Advertisers may want reports combining data from campaigns and ads, requiring optimized joins and foreign key relationships.
+
+**Point Queries**
+
+- These are simple queries where data is retrieved or updated by a unique identifier.
+    - **Example**: "Get the user profile for user with ID X" or "Update the location for user with ID Y."
+    - No joins or complex conditions are involved.
+
+**Non-relational databases** are optimal for point queries:
+
+1. **Blazing Fast Reads**: Keys are **indexed** for direct access.
+2. **Schema-less Flexibility**: Each user’s data is self-contained, so schema changes won’t disrupt queries.
+
+**Planning for the Future**
+
+One pattern that we may see in the above Q&A is that we not only look at the current state of the system, but also plan a bit for the near future. We need to know briefly how the system is going to evolve over time, the query patterns that might change over time, the data that might change over time. Just looking at the current state of the data might give us a one-sided view, which might not be optimal.
+
+**For example**, the user metadata system simply stores the names of users today. Knowing that, we may decide to go with a relational database. However, if we know that it's possible that more and more data is going to be added to this metadata store and that the fields are going to be added/removed very frequently, we might want to rethink the decision. Relational DBs will soon slow us down with slow schema changes and frequent application downtime, and therefore we might want to change our decision to using a non-relational database.
+
+**Consider the Holistic Impact**
+
+For the ease of understanding, we looked at each question individually and in isolation, but in practice, we need to look at all questions together holistically. For example, it's possible that answering one question might lead us to choose relational databases but in answering the next one, non-relational databases come out as the optimal choice. In such cases, we must:
+
+1. Enlist all the pros and cons of each option with reference to the questions.
+2. See if there are any non-negotiable requirements that come along the way. For example, if transactional support is absolutely needed, and we cannot give that away, even if the fields of the data keep changing very dynamically we might have to select relational databases and accept the disadvantage of frequent schema changes.
+3. Finally, go with the option that maximizes how the system will benefit with the pros of that option and minimize the disadvantage we will face with the cons of the option. In all honesty, this is a world of trade-offs, and therefore we will very rarely have a system-database pair where we benefit from all the pros of the database and have no disadvantage from the cons of the database.
