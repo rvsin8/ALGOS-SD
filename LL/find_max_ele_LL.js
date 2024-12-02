@@ -1,6 +1,4 @@
 /*
-Description
-▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
 Q. Given an unsorted linked list, find the element with the largest value.
 
 Examples:

@@ -1,0 +1,120 @@
+
+“In this chapter, **we design a proximity service**. A proximity service is used to discover nearby places such as restaurants, hotels, theaters, museums, etc., and is a core component that powers features like **finding the best restaurants nearby on Yelp or finding k-nearest gas stations on Google Maps**. Figure 1 shows the user interface via which you can search for nearby restaurants on Yelp [1]. Note the map tiles used in this chapter are from Stamen Design [2] and data are from OpenStreetMap [3].
+
+**Step 1**: 
+
+Understand the Problem and Establish Design Scope
+Yelp supports many features and it is not feasible to design all of them in an interview session, so it’s important to narrow down the scope by asking questions. The interactions between the interviewer and the candidate could look like this:
+
+**Candidate**: Can a user specify the search radius? If there are not enough businesses within the search radius, does the system expand the search?
+
+**Interviewer**: That’s a great question. Let’s assume we only care about businesses within a specified radius. If time allows, we can then discuss how to expand the search if there are not enough businesses within the radius.
+
+**Candidate**: What’s the maximal radius allowed? Can I assume it’s 20 km (12.5 miles)?
+
+**Interviewer:** That’s a reasonable assumption.
+
+**Candidate**: Can a user change the search radius on the UI?
+
+**Interviewer**: Yes, we have the following options: 0.5km (0.31 mile), 1km (0.62 mile), 2km (1.24 mile), 5km (3.1 mile), and 20km (12.42 mile).
+
+**Candidate**: How does business information get added, deleted, or updated? Do we need to reflect these operations in real-time?
+
+**Interviewer**: Business owners can add, delete or update a business. Assume we have a business agreement upfront that newly added/updated businesses will be effective the next day.
+
+**Functional Requirements**
+Based on this conversation, we focus on 3 key features:
+
+**Return all businesses based on a user’s location (latitude and longitude pair) and radius.**
+
+**Business owners can add, delete or update a business, but this information doesn’t need to be reflected in real-time.**
+
+**Customers can view detailed information about a business.**
+
+**Non-Functional Requirements**
+From the business requirements, we can infer a list of non-functional requirements. You should also check these with the interviewer.
+
+**Low latency**. 
+
+**Users should be able to see nearby businesses quickly.**
+
+**Data privacy**. 
+
+**Location info is sensitive data. When we design a location-based service (LBS), we should always take user privacy into consideration. We need to comply with data privacy laws like General Data Protection Regulation (GDPR) [4] and California Consumer Privacy Act (CCPA) [5], etc.**
+
+**High availability and scalability requirements**. 
+
+**We should ensure our system can handle the spike in traffic during peak hours in densely populated areas.**
+
+**Back-of-the-envelope estimation**
+
+Let’s take a look at some back-of-the-envelope calculations to determine the potential scale and challenges our solution will need to address. Assume we have 100 million daily active users and 200 million businesses:
+
+Calculate QPSSeconds in a day = 24 x 60 x 60 = 86,400. We can round it up to 105 for easier calculation. 105 is used throughout this book to represent seconds in a day. Assume a user makes 5 search queries per day.Search QPS = 100 million x 5 / 105 = 5,000.
+
+API Design
+We use the RESTful API convention to design a simplified version of the APIs.
+
+GET /v1/search/nearby
+
+This endpoint **returns businesses based on certain search criteria**. In real-life applications, search results are usually **paginated**. Pagination is not the focus of this chapter but is worth mentioning during an interview.
+
+Request Parameters:
+
+| Field | Description | Type |
+| --- | --- | --- |
+| latitude | latitude of a given location | decimal |
+| longitude | longitude of a given location | decimal |
+| radius | optional. default is 5000 meters or about 3 miles | int |
+
+Response Body
+{ 
+
+"total": 10, 
+
+"businesses": [{business object}]
+
+}
+
+The business object contains everything needed to render the search result page, but we may still need additional attributes such as pictures, reviews, star rating, etc., to render the business detail page. 
+
+Therefore, when a user clicks on the business detail page, a new endpoint call to fetch the detailed information of a business is usually required.
+
+| API | Detail |
+| --- | --- |
+| GET /v1/businesses/{:id} | returned detailed information about a business |
+| POST /v1/businesses | add a business |
+| PUT /v1/businesses/{:id} | update details of a business |
+| DELETE /v1/businesses/{:id} | delete a business |
+
+If you are interested in real-world APIs for place/business search, two examples are Google Places API [7] and Yelp business endpoints [8].
+
+**Data Model**
+In this section, we discuss the read/write ratio and the schema design. The scalability of the database is covered in deep dive.
+
+**Read/write ratio
+Read volume is high** because the following two features are very commonly used:
+
+**Search** for nearby businesses.
+
+**View the detailed information** of a business.
+
+On the other hand, the write volume is low because adding, removing, and editing business info are infrequent operations.
+For a read-heavy system, a relational database such as MySQL can be a good fit. 
+
+Let’s take a closer look at the schema design:
+
+**Data Schema**
+The key database tables are the business table and the geospatial (geo) index table.
+
+**Business Table**
+The business table contains detailed information about a business. It is shown in Table 3 and the primary key is business_id.
+
+Geo Index Table
+A geo index table is used for the efficient processing of spatial operations. Since this table requires some knowledge about geohash, we will discuss it in the “Scale the database” section in deep dive.
+
+“Load balancer
+The load balancer automatically distributes incoming traffic across multiple services. Normally, a company provides a single DNS entry point and internally routes the API calls to the appropriate services based on the URL paths.
+Location-based service (LBS)
+The LBS service is the core part of the system which finds nearby businesses for a given radius and location. The LBS has the following characteristics:
+It is a read-heavy service with no write requests.QPS is high, especially during peak hours in dense areas.”
