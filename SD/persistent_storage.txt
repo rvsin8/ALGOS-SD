@@ -1,0 +1,324 @@
+# Persistent Storage
+
+This is one topic that needs little introduction in today’s day and age. Today, where vast amounts of data are generated, collected, and processed every second, databases and persistent storage systems play a pivotal role in storing, organizing, managing, and retrieving information efficiently. From e-commerce platforms and social media networks to banking systems and healthcare applications, databases serve as the backbone of data management, ensuring data integrity, availability, and accessibility.
+
+Databases serve as centralized repositories for storing data. Data could be structured, semi-structured or unstructured data, and database systems allow applications to access and manipulate information efficiently. By providing a structured framework for data storage and retrieval, databases enable organizations to organize, analyze, and derive insights from their data assets.
+
+**Evolution over Time**
+
+In today's world, where data is generated at an unprecedented rate, databases play a crucial role in enabling businesses to harness the power of data-driven decision-making. Whether it's tracking customer transactions, analyzing user behavior, or managing inventory levels, databases provide the foundation for businesses to optimize operations, drive innovation, and deliver personalized experiences to users. However, if we rewind back a few decades and analyze the evolution of databases over time, we’ll be amazed. Not only to see how technology has advanced but also how the exponential growth of data and changing business requirements have contributed to the evolution of storage systems over time. Here are some of the ways databases have evolved:
+
+1. **Basic Data Storage to Advanced Query Capabilities:** Initially, databases focused on basic data storage and limited query patterns. With technology advancing, query capabilities expanded, allowing for more complex data analysis and reporting.
+2. **Diverse Data Types and Use Cases:** As data volumes and variety increased, databases evolved to support a broader range of data types and specialized use cases. This led to the emergence of specialized database systems such as document databases, key-value stores, column-family stores, and graph databases, catering to specific data management requirements and use cases.
+3. **Scalability Challenges and Cloud Adoption:** The rise of big data and cloud computing posed scalability challenges for traditional databases, leading to the adoption of cloud-native database solutions. Cloud databases offer scalability, flexibility, and cost-effectiveness for managing data at scale.
+4. **Integration with Emerging Technologies:** Database systems are increasingly integrating with emerging technologies such as AI, ML, blockchain, and IoT to enhance data analytics, automation, and decision-making capabilities, enabling organizations to leverage data-driven insights and innovations.
+
+**Online Databases and Offline Databases**
+
+**Online Databases**
+
+Online databases are designed to be continuously available and accessible for query and manipulation in real-time. They serve as the backend storage systems for various online applications, enabling users to interact with data dynamically.
+
+**Examples are MySQL, PostgresSQL, MongoDB**. Here are some key characteristics and considerations of online databases:
+
+1. **Real-Time Access**: Online databases support real-time access to data, allowing users and applications to retrieve, update, and manipulate data instantly. This real-time access is essential for applications that require immediate responses to user queries and interactions, such as e-commerce platforms, social media networks, and banking systems.
+    1. Real-time access ensures data is **instantly available for reading or writing**. This is essential for applications where users expect immediate feedback.
+    2. **Example:**
+        - Imagine an **e-commerce site** where users add items to a cart. Real-time access ensures the inventory updates as soon as someone places an order.
+        - Without real-time access, users might see outdated inventory, leading to overbooking or disappointment.
+    3. Databases achieve this through **caching** and **connection pooling** to keep query response times low.
+        - **How it works:** If a user queries the price of a product, the database serves it directly from cache instead of re-processing the query every time.
+        - **Locking:** Only one user can modify a record at a time, e.g., editing a movie title locks the title field.
+        - **Transactions:** Ensure all operations in a process succeed together. Example: Transferring money involves two steps: deducting from one account and adding to another. If one step fails, both are rolled back.
+2. **Concurrent Access**: Online databases are designed to handle concurrent access from multiple users or applications simultaneously. They employ concurrency control mechanisms, such as locking, transactions, and isolation levels, to ensure data integrity and consistency in multi-user environments.
+    1. Multiple users or applications can interact with the database at the same time without conflicts.
+    2. **Example:**
+        - Think of **Netflix**, where millions of users stream videos and add shows to watchlists simultaneously.
+        - If two users try to modify the same show entry (e.g., add reviews), the database ensures the changes don’t corrupt each other.
+3. **Optimized for Performance**: Online databases are optimized for performance to deliver low-latency responses to user queries and transactions. They employ indexing, query optimization, caching, and other performance-enhancing techniques to minimize response times and improve overall system efficiency.
+    1. Online databases prioritize speed for both reading and writing operations, essential for seamless user experiences.
+    2. **Example:**
+        - **Instagram** posts appear instantly after you share them. The database must handle both the upload (write) and visibility (read) efficiently.
+        - **Indexing:** Posts are stored in a way that finding "posts with #travel" is super-fast—like a search index in a book.
+            - **Indexing:**
+                - Speeds up searches, e.g., searching for all posts by a user. Without it, the database scans every post.
+    3. **Query Optimization:**
+        - A poorly written query (e.g., `SELECT * FROM posts`) fetches everything and slows the database. Query optimizers rewrite such queries for efficiency.
+    4. **Replication:**
+        - Duplicates data across servers so reads can be handled by replicas, while the main server handles writes.
+        
+
+**Question:** Why would a banking app fail without real-time access to data like account balances?
+
+**Answer:** Without real-time access, users might see outdated balances, leading to overdrafts or fraudulent transactions as the system wouldn't reflect recent changes instantly.
+
+**Question:** If two users try to book the last Airbnb at the same time, what prevents overbooking?
+
+**Answer: Transactions** and **locking** ensure that only one user’s booking request is processed at a time, preventing the same property from being reserved twice.
+
+**Question:** Why might indexing slow down write-heavy applications like real-time messaging?
+
+**Answer:** Indexing requires updates every time data is inserted or modified, adding overhead to write operations, which can slow down systems with frequent writes like messaging apps.
+
+**Offline Databases**
+
+Offline databases, also known as batch databases, are used for storing and processing data in bulk at scheduled intervals, typically during periods of low activity or downtime. While offline databases are not accessible for real-time interactions, they play a crucial role in performing batch processing, data analysis, and reporting tasks.
+
+**Examples are Apache Hadoop** (with its component called Apache Hive)
+
+1. **Batch Processing:** Offline databases are used for batch processing tasks where data is processed in bulk at scheduled intervals or during predefined batch windows. This may involve tasks such as data extraction, transformation, loading (ETL), analytics, and reporting.
+    1. Offline databases are ideal for tasks where data processing doesn’t need to happen instantly. For instance, calculating payroll, consolidating sales data, or updating customer records can be queued and executed in one go during off-hours. This allows systems to efficiently handle large datasets without impacting online services.
+2. **Scheduled Updates:** Data in offline databases is updated periodically based on predefined schedules or triggers. These updates may involve data imports, exports, transformations, and aggregations performed offline without real-time user interactions.
+    1. Offline databases update data periodically instead of in real-time. This is useful when immediate data consistency isn’t critical. For example, a retail chain might synchronize inventory levels from individual stores to a central system every night, avoiding constant synchronization overhead.
+3. **Reduced Operational Overhead:** Since offline databases do not require continuous availability and real-time responsiveness, they typically have lower operational overhead compared to online databases. This allows organizations to optimize resource utilization and reduce infrastructure costs for offline processing tasks.
+    1. Since offline databases don’t need to be always accessible, they require less expensive infrastructure. There’s no need for high-availability setups or optimized query performance during downtime. This translates into lower costs for storage and processing.
+4. **Resource Efficiency:** Offline databases can leverage batch processing techniques to optimize resource utilization and achieve better performance efficiency for data-intensive tasks. They can process large volumes of data more efficiently by batching similar operations and maximizing parallelism.
+    1. Offline databases excel at resource utilization by handling large datasets in bulk. By grouping similar operations—like aggregations or data cleaning—they minimize repeated tasks and make better use of available computing power, often leveraging parallel processing.
+5. **Data Analysis and Reporting:** Offline databases are often used for data analysis, reporting, and business intelligence (BI) purposes, where historical data is analyzed to derive insights, trends, and patterns over time. They enable organizations to perform complex analytics and generate reports based on aggregated data from multiple sources.
+    1. Offline databases are perfect for tasks like business intelligence and historical trend analysis. These computations can be complex and time-consuming but don’t need to run in real time. An example would be generating quarterly sales reports or identifying trends from years of customer data.
+
+**Question: It seems like online databases give us the flexibility of real time updates and queries. Why use offline databases when you can just put in all your data in online databases?**
+
+The short answer is that *there is no free lunch*.
+
+1. **Cost**. Since offline databases are in some sense “read only” (don't allow real time updates) and not real time, they can be a lot more cost effective than real time database systems. The reason being that real time database systems consume a lot more hardware and software resources with the real time features they provide.
+2. **Query Patterns and performance** Some data processing tasks are inherently batch-oriented and do not require real-time processing. For example, large-scale data analysis, reporting, and data transformation tasks can be more efficiently performed in batch mode, especially when dealing with large volumes of data. Also, by aggregating and processing data in batches, organizations can optimize performance and reduce the overhead associated with handling individual transactions or real-time updates. Batch processing allows for parallelism, optimization, and resource allocation strategies that can improve overall system efficiency.
+
+**Additional Reading**
+
+[](https://www.notion.so/150915a5a537804f9a38cd5e2d1a281d?pvs=21)
+
+**Standalone Databases and Distributed Databases**
+
+As their name suggests, a standalone database resides on a single server or machine and is managed as a single unit. It consists of a single instance of the database management system (DBMS) running on a single server, handling all data storage and processing tasks locally. On the other hand, a distributed database spans multiple servers or nodes, with each node containing a subset of the data. Data is distributed across multiple nodes, and the database management system coordinates data access and processing across the distributed environment.
+
+To better understand the difference between these two types of databases, let’s start by looking at two real-life examples of data models.
+
+**Advertiser and Ads Data**
+
+Let's consider a database that lets advertisers manage their campaigns. There are 3 entities in the picture, advertiser, campaign, and ad. An advertiser entity can have multiple campaigns running. Each campaign entity can have multiple ads running.
+
+**Side Note**
+
+Note how the relationship between a) Campaigns and Advertisers and b) Ads and Campaigns is maintained. Since it is a many-to-one relationship, the parent ID resides in the child table.
+
+This simple database system allows advertisers to create, update and view their campaigns and ads.
+
+**User Metadata**
+
+Now consider a totally different system that simply shows information about a User and allows the User to edit these free text fields. Users can also add miscellaneous free data to their entity object. This is what the model looks like:
+
+Note that this system simply allows Users to view their Data given an ID and allows the User to update their data given their ID.
+
+**Comparing the Models**
+
+With these two fairly different data models in mind, let's analyze a few things.
+
+**Schema, data model and flexibility**
+
+Note that the first example has data in structured tables with rows and columns, following a predefined schema. Data relationships are established through foreign key constraints. The model is also a lot more strict and less flexible, any attribute that needs to be added would mean that you would need to change the database schema.
+
+On the other hand, although the second example has *some* structure, it is a lot more “schema less” meaning that user metadata could have any arbitrary information, different users could have different keys and keys could be added and removed arbitrarily.
+
+**Query patterns**
+
+The first system would need to address a lot more complex queries that involve joins. For example, “give me all ads of this advertiser” or “give me all ads of this campaign ID”. This would mean that we would have to join data from multiple tables using the foreign key constraints.
+
+For the second example, the queries are a lot more **“point queries”**. Which means the only real query constraint is the ID. All reads and updates are done to this single object using the ID without using any joins.
+
+**Additional Reading on Data Models**
+
+[Relational Model vs. Document model:- Chapter 2. Data models and Query languages, Designing Data Intensive Applications.](https://www.notion.so/Relational-Model-vs-Document-model-Chapter-2-Data-models-and-Query-languages-Designing-Data-Int-150915a5a53780689d12e49fa53e6665?pvs=21)
+
+**Defining Relational and Non-Relational Databases**
+
+The two different use cases explain how two different types of database systems work and are used. With these two examples in mind, let’s jump in to see how relational databases and non-relational databases work.
+
+**Relational Databases**
+
+Relational databases organize data into structured tables with rows and columns, adhering to a predefined schema. Tables represent entities or relationships in the data model, with each row representing a record and each column representing a specific attribute or field. Every table complies with a predefined schema and if any columns need to be added then the schema change needs to be applied beforehand on the entire database table.
+
+Data is stored in **tables** with strict **rows** (records) and **columns** (attributes), adhering to a **schema** (predefined structure).
+
+Relational databases enforce data integrity constraints, such as primary key, foreign key, unique key, and check constraints, to maintain data consistency.
+
+Integrity enforces rules like **primary keys**, **foreign keys**, and **unique constraints** to ensure data consistency.
+
+Usually, relational databases scale less than non-relational databases, and are less performant (think about a) Transactional Support, b) all the integrity checks that need to be made after every transaction). At that cost, they provide high data integrity and high reliability and better support for joins.
+
+Use SQL (Structured Query Language) for **complex joins**, aggregations, and relationships between data.
+
+For querying, relational databases usually use SQL style query languages.  We will look at Relational Databases with more depth in the next chapter.
+
+**Transactional Support**: Follows **ACID properties** (*Atomicity, Consistency, Isolation, Durability*).
+
+**Joins**: Excellent for handling **relationships** between entities (e.g., *many-to-one or one-to-one*).
+
+**Reliability**: Ideal for scenarios requiring **strict consistency** (e.g., *banking or e-commerce transactions*).
+
+**Limitations**:
+
+- Less scalable for massive datasets.
+- Schema changes can be challenging.
+
+**Examples**: MySQL, PostgreSQL.
+
+**Non-Relational Databases (e.g. Key-Value Stores, Document Databases)**
+
+These databases don't use the tables, fields, and columns structured data concept from relational databases. NoSQL databases were developed to suit the second example. When the data is such that it doesn't need to be tied down by strict schemas, and the flexibility of adding keys is wanted, it is an attractive choice. Also, when there are no relations between different entities and queries are frequently “point” queries, it could be a good option to go with non-relational databases.
+
+Schema-less, flexible storage models (e.g., key-value, document, column-family).
+
+Non-relational databases generally scale more easily than relational databases and thus can achieve higher throughput. They do well with large amounts of data and are more performant (because of no integrity or schema checks). Of course, at that cost, they often don't provide transactional support (we will speak about this later) and are less performant for queries with joins.
+
+Easily scales horizontally for large datasets and high throughput.
+
+Handles unstructured or semi-structured data; easy to add fields.
+
+Faster for simple operations (e.g., point lookups), no schema or integrity constraints.
+
+Like mentioned above, non-relational databases also don't do so well with relationships (one to one and many to one). If your system has entities that are usually fully loaded at once and somewhat isolated (not connected with other entities), then this is a good option to go with.
+
+Not ideal for one-to-one or many-to-one relationships.
+
+Often lacks full ACID compliance.
+
+Struggles with joins or multi-entity.
+
+**Examples**: MongoDB (**documents**), Redis (**key-value**), Cassandra (**wide-column**).
+
+**Best For**: Isolated entities, real-time analytics, caching, large-scale applications.
+
+**Key Insight**: Use when data relationships are minimal and scalability is critical.
+
+**Relational Database**
+
+**Strict Schemas/Data Model**
+
+As mentioned before, relational databases ensure that each database table has a predefined schema. Every column has a data type. Ids are usually primary keys and relationships are maintained with the help of foreign keys. Whenever new attributes (columns) need to be added in the database, the schema has to be changed beforehand and those schema changes need to be applied to the database before that new column can be used.  Based on the requirements of your system, here are some of the pros and cons of having a strict schema.
+
+Each table has a fixed structure, with **columns having specific data types**.
+
+Tables are linked using **primary keys** and **foreign keys**, enforcing **referential integrity**.
+
+**Adding new columns requires updating the schema** across the database.
+
+**Pros**
+
+- **Clean data, reduced possibility for corruption**. Having data types for each column means that the database will make sure that, in general, garbage data will not enter the db. The schema ensures data integrity and consistency, preventing invalid or inconsistent data from being stored in the database.
+    - Schema enforces data validation.
+    - Prevents garbage data (e.g., storing a string in a numeric column).
+- **Data organization and clarity**. A structured database table is a lot easier to understand and interact with in code.
+    - Structured tables make relationships and data easier to understand.
+    - Predictable format simplifies coding and querying.
+- **Data Integrity.** Having constraints for every column enable having data integrity. For example, Not null columns will make sure there is no null data entered. Foreign key constraints also make sure that the values entered as foreign keys are valid rows in the foreign table. (This is called **Referential Integrity**).
+    - **Constraints**:
+        - `NOT NULL`: Ensures columns always have a value.
+        - **Foreign Keys**: Guarantees linked data exists (e.g., valid user IDs in a transactions table).
+    - Maintains consistency between related tables.
+- **Query Optimization and performance**. Since the database knows so much about the table, it can optimize query execution plans and generate efficient queries internally, reducing the time and resources required to retrieve and manipulate data.
+    
+    For example, it can use indexed columns to drastically eliminate rows and cut down the search space.
+    
+    - **Indexes**:
+        - Accelerate searches by creating a "shortcut" for queries.
+        - Great for columns that are frequently searched or used in joins.
+    - **Query Execution Plans**:
+        - Database optimizes the retrieval process using knowledge of schema, constraints, and indexes.
+        - Results in faster data access and efficient resource use.
+        
+
+In an **e-commerce application**:
+
+- **Users Table**: Schema ensures user IDs are unique (`Primary Key`).
+- **Orders Table**: References user IDs (`Foreign Key`) to enforce valid relationships.
+- Queries like "fetch all orders for a user" are highly efficient due to structured data and indexed columns.
+
+**Cons**
+
+- **Lack of flexibility.** Having a strict schema means that every new addition of columns needs a schema change applied to the database. This makes it hard for cases where attributes keep changing frequently.
+    - **Schema-bound**: Adding new columns requires schema updates.
+    - In dynamic systems (e.g., social media with ever-changing metadata), schema rigidity can hinder adaptability.
+- **Performance loss on schema updates.** When schema changes alter the table, it could mean downtime since the table will be “locked”.
+    - Schema changes (e.g., adding/removing columns) may **lock tables**, preventing reads/writes during updates.
+    - This can lead to **downtime** in high-traffic systems.
+- **Query Performance.** It's understandable that the database is doing a lot of work and checks while writing data (constraints, datatype checks, referential integrity checks, etc.), which means in general queries, specially write queries in relational DBs are much slower than in non-relational DBs.
+    - Relational databases perform extensive checks during writes:
+        - **Constraints validation**: Ensures data adheres to rules (`NOT NULL`, `UNIQUE`, etc.).
+        - **Data type enforcement**: Prevents invalid data entries.
+        - **Referential integrity checks**: Confirms foreign keys reference valid rows.
+
+These operations ensure reliability but increase write latency compared to non-relational databases.
+
+**Transactions/ACID**
+
+Lets see an example of a banking system. Users A and B have bank accounts and user A transfers some money into account B. At a high level, here are all the database operations that happen behind the scenes:
+
+1. Check if A has the balance
+2. Deduct money from A’s balance
+3. Add money to B’s balance
+4. Check if B’s account is correct
+
+Now imagine that after step 2, the database goes down for some reason. It would be detrimental to have the balance deducted from A’s account and not added to B, correct? This is where the concept of a transaction comes into play.
+
+In the context of a relational database, a transaction refers to a logical unit of work that consists of one or more database operations (such as inserts, updates, or deletes) that are executed as a ***single, indivisible*** unit. This means that either **all the operations happen** or **they all don’t**. The concept of a transaction is fundamental to ensuring data integrity, consistency, and reliability in relational databases.
+
+Transactional support is one of the key aspects of relational databases and something that we must consider strongly when selecting the right kind of database for our system. If there are cases where we want all or nothing, relational databases offer a lot more native support for transactions than a non-relational databases
+
+The key aspects of a transaction are **atomicity, consistency, durability, and isolation**. This is where the acronym **ACID** comes from. Let's look at each of them briefly.
+
+1. **Atomicity**
+    1. Atomicity ensures that all operations within a transaction are executed as a single, indivisible unit. Either all operations in the transaction are **completed successfully, or none of them are**.
+    2. If any operation within the transaction fails or encounters an error, the entire transaction is rolled back, and the database returns to its previous state (i.e., all changes made by the transaction are undone).
+2. **Consistency**
+    1. Consistency guarantees that the database remains in a valid and consistent state before and after the execution of a transaction.
+    2. Transactions must adhere to all integrity constraints, such as primary key constraints, foreign key constraints, and unique constraints, to **ensure the integrity of the data**.
+3. **Isolation**
+    1. Isolation ensures that the changes made by one transaction are isolated from the changes made by other concurrent transactions.
+    2. Concurrent transactions execute as if they were isolated from each other, **preventing interference and maintaining data integrity**.
+    3. Isolation levels, such as Read Uncommitted, Read Committed, Repeatable Read, and Serializable, define the degree of isolation between concurrent transactions.
+4. **Durability**
+    1. Durability guarantees that the changes made by a committed transaction persist even in the event of a system failure or crash.
+    2. Once a transaction is committed, its changes are written to durable storage (such as disk) and remain intact, even if the system crashes or loses power.
+
+**Data Modeling with Relational Database**
+
+In the previous unit, the Advertiser and Ads data system was a good example of an object model. Lets look at another data model known as the “Graph Data Model” and how we can use relational databases to implement this data model to represent nodes and edges
+
+Graph Data Model
+
+Consider a social network where users have other friends, followers and posts.
+
+- Users can author Posts. A post can have only one author.
+- Users can be friends with other users. This is a bidirectional edge, which means if A is a friend of B, B is a friend of A too
+- Users can follow other users. This is a unidirectional edge, A following B does not mean that B follows A too.
+
+Modeling Graphs in Relational DBs
+
+How would we model this graph in a relational DB?
+
+First, every node will have its own table. So here, we would have 2 node tables, User and Post.
+
+Next, the User <-> Post mapping is a one to many relationship and therefore the post table can have a ***foreign key*** for its author pointing to User ID.Following the above two points here is what the User table and Post Table would look like:
+
+| Column 1 | Column 2 | Column 3 | Column 4 | Column 5 |
+| --- | --- | --- | --- | --- |
+| ID | First Name | Last Name | Country | Currency |
+
+| Column 1 | Column 2 | Column 3 |
+| --- | --- | --- |
+| ID | Author_id (Foreign Key to ID column of the User table) | Post Text |
+
+The friends and following edges represent many to many relationships. One way of representing many to many relationships is to have a ***separate edge table*** to represent those edges. The edge table can have one column as the **from_node**, the other one as **to_node** and one column that mentions the edge type. For example with respect to the diagram above we could have:
+
+| Column 1 | Column 2 | Column 3 |
+| --- | --- | --- |
+| From_ID | To_ID | Edge Type |
+| USER ID 1 | USER ID 2 | FRIEND |
+| USER ID 2 | USER ID 1 | FRIEND |
+| USER ID 1 | USER ID 3 | FOLLOWS |
+
+There are some discussions on whether to have a separate table for each edge type or whether to keep them in the same table with a column that denotes the edge type. The answer depends on a lot of things such as how much we expect the data to grow and whether one table might become too big.
+
+- One general consensus is that if we expect to introduce new edge types all the time, have a separate table for each might become a big overhead in terms of schema changes and so on.
+- If each edge table has a lot of metadata that itself might need structure, then maybe it's okay to have one table per edge type.
