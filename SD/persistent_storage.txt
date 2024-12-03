@@ -1137,3 +1137,159 @@ Getting the right balance and figuring out the right indexes is not a one time s
 - **Analyze query patterns**: Before selecting an index, analyze the types of queries frequently executed in your database. Understand the SELECT, UPDATE, DELETE, and INSERT operations that are prevalent in your application. For queries involving specific filters or sorting, consider indexes on the columns used in the WHERE clause or ORDER BY clause. This can significantly improve the performance of these operations.
 - **Tracking cardinality**: Cardinality refers to the **uniqueness of values in a column**. High cardinality means that the column has mostly unique values, while low cardinality indicates a smaller set of unique values. Columns with **high cardinality,** such as primary keys or columns with mostly unique values, are good candidates for indexing. Indexing such columns enhances search performance. However, when indexing columns with **low cardinality**, it may result in inefficient use of index space. For instance, indexing a Boolean column might not be beneficial due to its limited unique values.
 - **Regular monitoring and tuning**: Regularly profile and analyze the performance of your database using monitoring tools. Identify slow queries, high-traffic tables, and areas for improvement. On the other hand, also keep track of index usage statistics to understand which indexes are actively contributing to query performance. You can throw out the ones not needed.
+
+**How Indexing Works**
+
+So now that we know what an index is, let's dig deeper to understand how they actually work, and what data structures are used to power them.
+
+Let's take the example of the employee table again that we saw in the previous chapter.
+
+The query we are trying to speed up is “Give me all employees of company <x>”. Therefore, we’ve decided to index the company ID column in the above table. Let's see how the index is stored and operated internally.
+
+**B-Tree Index**
+
+**Structure**
+
+B-trees are self-balancing tree structures that maintain sorted data. They have a root node, internal nodes, and leaf nodes, with each node containing a certain number of keys and pointers.
+
+In the above Employee table example, with a b-tree index on company ID, we may have a structure that looks something like:
+
+As you can see, the entire range of company IDs are split at every level. The internal nodes store the ranges of the column thats indexed (company ID in this case) and the leaf nodes point to the IDs of the rows in the table (employee IDs in this case). The tree is both a) sorted and b) balanced.
+
+Now when you want to lookup employees of company ID 1, the flow would be:
+
+1. Go to root
+2. Traverse to the left internal node (company IDs 1-2)
+3. Traverse to the left internal node again (company ID 1)
+4. Get all leaves of this node, which are employee IDs 1 and 2
+
+The leaf nodes have the actual IDs of the employees. Since this tree is sorted and balanced, you can get to the leaves (data) of the indexed column in **logarithmic time.**
+
+- This is because at every level, you are eliminating half the remaining data that you have to go through.
+- Another way of looking at it is that the tree is binary and balanced which means the depth of the tree is in the order of log(n), where n is the number of distinct values of the indexed column.
+
+**Use Cases**
+
+B-trees are **suitable for range queries and ordered data retrieval**. Commonly used in scenarios where data needs to be sequentially accessed, such as in-range searches. This is because data is stored in a sorted fashion.
+
+**Range Queries**: Optimized for retrieving ordered data (e.g., "Company ID between 1 and 10").
+
+**Sequential Access**: Efficient for operations requiring sorted data.
+
+**Quick miscellaneous notes**
+
+- Recall that indexes in general provide fast reads but at the cost of increased write latencies. In the case of B-tree indexes, since they are balanced and sorted, writes may slow down not only from adding new nodes but because the **tree itself may need to re-balance**.
+- If the database is small and query patterns seem like point lookups, it just makes sense to use a **hash index in those cases** (see below).
+- This kind of structure where the index entries are organized in a tree-like structure with multiple levels is called **multi-level index**.
+
+**Structure**
+
+A B-tree is a self-balancing, sorted tree structure designed for efficient data retrieval. It consists of:
+
+- **Root Node**: The top-most node.
+- **Internal Nodes**: Store ranges of the indexed column (e.g., company IDs) and pointers to child nodes.
+- **Leaf Nodes**: Contain pointers to the actual table data (e.g., employee IDs).
+
+In a B-tree indexed table (e.g., Employee table with a company ID index), the tree is both **sorted** and **balanced**, enabling logarithmic time complexity for lookups.
+
+**Example Lookup (Company ID = 1)**:
+
+1. Start at the root node.
+2. Navigate to the appropriate internal node (range: 1–2).
+3. Traverse further to the specific node (Company ID = 1).
+4. Retrieve employee IDs from the leaf nodes.
+
+**Performance**
+
+The tree’s balance ensures that each lookup requires at most `log(n)` operations, where `n` is the number of distinct values in the indexed column.
+
+**Write Latencies**: Writes are slower due to potential rebalancing when inserting or deleting nodes.
+
+**Alternative Indexes**: For small datasets or frequent point lookups, **hash indexes** may be faster, as they avoid the overhead of maintaining a tree structure.
+
+**Multi-Level Index**: B-tree indexes use multiple levels to organize entries, which reduces the number of disk accesses needed for retrieval.
+
+**Hash Index**
+
+**Structure**
+
+Hash indexes use a hash function to map keys to specific locations in a fixed-size array of buckets. Each bucket contains a linked list of entries with the same hash value.
+
+In our example, assume we have an array of buckets that can be easily looked up.
+
+Assume we have a hash function which hashes company IDs as
+
+- f(1) = Bucket 1
+- f(2) = Bucket 2
+- f(3) = Bucket 3
+
+The concept of hashing here is the same as the HashMap data structure. You have a hash function that, in constant time, can take an input and map it to a particular location in memory. Here, since the index is on company ID, the hash function will take a company ID as the input and map it to a location where the corresponding employee IDs of that company are stored. This will happen in amortized O(1) time.
+
+In each bucket are the employee ids of those companies whose hash points to that bucket. When a request comes in, you apply the hash function which takes you straight to the bucket and the information in the bucket is what you are looking for.
+
+**Use Cases**
+
+Hash indexes are effective for equality searches, where the goal is to quickly locate a specific record based on a key. Well-suited for scenarios with in-memory databases and primary key indexing.
+
+**Equality Searches**: Best for queries like “Company ID = 1”.
+
+**In-Memory Databases**: Ideal for scenarios where quick point lookups are critical, such as **primary key indexing**.
+
+**Quick Miscellaneous Notes**
+
+- Hash indexes are not optimized for sorting and range queries. B-tree indexes are much more suitable for those kinds of queries. The reason is that B-tree stores the indexed column in a sorted way already. For hash indexes, not only is there no way to store indexed columns in a sorted way, but typically, data within each hashed bucket is also unsorted.
+- Hash indexes may perform poorly in scenarios where the hash function poorly distributes keys across buckets. If there are a lot of keys in the same bucket, this will lead to collisions and therefore a degradation of the query performance because within the bucket, you will still have to linearly search for the data. (This is a property of hash map data structures in general.)
+- This is a **single level index**. All the index entries are stored in a single, flat structure, allowing for direct access to the data.
+
+**Not Suitable for Range Queries**: Hash indexes are not optimized for range or ordered queries, as they do not maintain data in a sorted manner (unlike B-trees).
+
+**Collisions**: Poor hash distribution can result in many keys mapping to the same bucket, requiring linear search within the bucket and degrading performance.
+
+**Single-Level Index**: Hash indexes have a flat structure, with no hierarchical levels, ensuring direct access to data.
+
+**Composite Indexes**
+
+Indexes need not necessarily be just on one column. Consider this table, which denotes different types of relationships between two users:
+
+Now, say we want to query all Friends of User 10. If we simply had an index on the User ID 1 column, then matching that with ID 10 would *give us all relationships* of User ID 10. Then we would have to do another pass and filter the “FRIEND” relation rows and return those as the result.
+
+This is not the best use of the index, specially if each user has tons of different relationships with different users. Instead, what we can do is have a ***multi-column index*** on (USER ID 1, Relation). This basically means that the B-tree index is built on the user and relation together — think concatenating user ID and relation — and having that as the sort key.
+
+Now we look up the index for (10, Friend) which easily gets us to the friends of User 10.
+
+A **composite index** is an index built on multiple columns, useful for queries that filter on a combination of fields.
+
+**Example:**
+For a table recording relationships between users (`User ID 1`, `Relation`, `User ID 2`), querying "Friends of User 10" benefits from a composite index on `(User ID 1, Relation)`:
+
+Without composite index: A single-column index on `User ID 1` retrieves all relationships for User 10, requiring additional filtering for “Friend.”
+
+With composite index: The `(User ID 1, Relation)` index efficiently narrows down to `(10, Friend)` directly.
+
+**Quick notes**
+
+- While creating the composite index, the order of columns ***does*** matter. If a composite index is created on columns (A, B, C), the index is efficient for queries that filter on A and B or just on A. However, it might be less effective for queries filtering only on columns B or C.
+- The size of the composite index is influenced by the order of columns. The more columns included in the index, the larger the index size.
+    
+    **Column Order**: The sequence of columns matters. For `(A, B, C)`, the index is effective for:
+    
+    - Queries filtering on `A`.
+    - Queries filtering on `A, B`.
+    - Less effective for filtering on just `B` or `C`.
+    
+    **Size**: Adding columns increases the index size. Balance index utility with storage and write performance costs.
+    
+
+**Structure**
+
+A **hash index** maps keys to specific locations in an array of buckets using a hash function. Each bucket contains entries (e.g., employee IDs) associated with keys that hash to the same value.
+
+Example:
+
+Using a hash function on `Company ID`:
+
+- `f(1)` → Bucket 1
+- `f(2)` → Bucket 2
+- `f(3)` → Bucket 3
+
+The hash function directly maps a `Company ID` to a bucket, where the corresponding data is stored. This enables **amortized O(1)** time complexity for lookups.
