@@ -21,12 +21,12 @@ class TreeNode {
       this.left = left;
       this.right = right;
     }
-  };
+};
   
-  function sumAllTreePaths(node) {
+function sumAllTreePaths(node) {
     if (!node) return 0;
     if (!node.left && !node.right) return node.value;
     let leftSum = sumAllTreePaths(node.left);
     let rightSum = sumAllTreePaths(node.right);
     return node.value + leftSum + rightSum;
-  };
+};
