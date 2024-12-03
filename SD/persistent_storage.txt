@@ -680,3 +680,460 @@ For the ease of understanding, we looked at each question individually and in is
 1. Enlist all the pros and cons of each option with reference to the questions.
 2. See if there are any non-negotiable requirements that come along the way. For example, if transactional support is absolutely needed, and we cannot give that away, even if the fields of the data keep changing very dynamically we might have to select relational databases and accept the disadvantage of frequent schema changes.
 3. Finally, go with the option that maximizes how the system will benefit with the pros of that option and minimize the disadvantage we will face with the cons of the option. In all honesty, this is a world of trade-offs, and therefore we will very rarely have a system-database pair where we benefit from all the pros of the database and have no disadvantage from the cons of the database.
+
+**NewSQL Databases**
+
+Apart from the two major types of databases discussed previously, there is also a new emerging trend of NewSQL databases. NewSQL databases are like a middle ground between traditional relational databases and non-relational databases. They offer the scalability and performance benefits of NoSQL databases while retaining the ACID compliance and SQL compatibility of RDBMS. We will look at ACID compliance in detail in the next chapter.
+
+**Examples include**: CockroachDB, YugabyteDB, TiDB, and MemSQL. Read about these in more detail if you’re curious.
+
+**Question: It seems like NewSQL databases are magic. They give us the pros of both relational and non-relational databases and seem to have no cons. What's the catch? How can it be possible that a solution gives us both sides of the trade-offs?**
+
+Well, it's true that NewSQL does give us the transactional support (ACID) of relational databases, the SQL support for relational databases while giving us the ability to scale horizontally like NoSQL databases. However, the key thing to note is that they meet us in the middle. They offer a balance between relational and non-relational features, and they may not be the best fit for every use case.
+
+**For example**, they may be better than relational databases in scaling, but they may not always match the scalability and performance characteristics of specialized NoSQL databases. Organizations with extreme scalability or performance requirements may still prefer specialized NoSQL databases tailored to their specific needs. Extreme write-heavy workloads might still be more optimized with NoSQL databases.
+
+Another point is that in general, NewSQL databases still maintain a relational data model, which means that generally they still require a predefined schema for data organization and may not be strictly schema-less like some NoSQL databases. Which means that while there are ways of getting more schema-less with New SQL compared to Relational databases, systems that require extreme flexibility might still not benefit from NewSQL Databases.
+
+While NewSQL databases scale better than traditional RDBMS by using distributed architectures, they might not achieve the **same extreme scalability or performance** as specialized NoSQL systems in certain scenarios:
+
+**Write-Heavy Workloads**: For workloads with intense, high-throughput writes (e.g., logging massive IoT data streams), NoSQL systems like Cassandra, optimized for eventual consistency, might outperform NewSQL.
+
+**Ultra-Low Latency**: In systems that prioritize milliseconds of response time over strict consistency, NewSQL's adherence to ACID properties might introduce additional overhead.
+
+NewSQL databases typically adhere to a relational data model, requiring **predefined schemas**:
+
+This works well for structured data but **limits flexibility** for systems needing frequent schema changes or working with unstructured data. **For example**:
+
+Dynamic applications that frequently modify their data models might find NoSQL's schema-less flexibility more convenient.
+
+Content management systems handling unstructured data like images, videos, or JSON might favor NoSQL.
+
+**Distributed Architecture :** Achieving ACID compliance in a distributed system is complex. 
+
+This can lead to:
+
+**Higher operational costs**: Managing and maintaining a distributed NewSQL cluster is more resource-intensive.
+
+**Latency trade-offs**: Consistency across nodes might result in higher latency for some operations compared to NoSQL systems with relaxed consistency models.
+
+**Cost of Adoption**
+
+NewSQL databases often involve **additional operational costs** due to their distributed nature, requiring multiple nodes and resources for deployment.
+
+Teams may face a **learning curve** in understanding the nuances of distributed systems, even though SQL itself remains familiar.
+
+Think of NewSQL as a versatile **crossover vehicle**: It blends the comfort of a sedan (RDBMS) with the off-road capability of an SUV (NoSQL). However, it might not perform as well as a dedicated off-roader in rugged terrain or match the efficiency of a sedan on a highway. It’s designed for balance, not specialization.
+
+**Vector Databases**
+
+Vector databases are a relatively new concept, and they’ve quickly become very popular because of the unexpected AI boom in a short time. Vector databases specialize in storing vectors, which are mathematical representations of data in a high-dimensional space. AI algorithms rely heavily on “nearest neighbor search” and vector databases.
+
+Vector databases are purpose-built to store and query **vectors**, which are numerical representations of data in a high-dimensional space. These databases have risen to prominence due to their ability to handle tasks central to modern AI applications, such as similarity search, recommendation systems, and natural language understanding.
+
+Make it easier to represent large data in terms of vectors
+
+Implement approximate nearest neighbor algorithms to help implement AI functions like similarity search, providing recommendations and so on.
+
+A **vector** is essentially a list of numbers that captures the essence of a piece of data.
+
+**Example**: A vector representing a sentence might encode its meaning, tone, and context into, say, 512 dimensions.
+
+These vectors are generated using AI models like word embeddings, image encoders, or recommendation algorithms.
+
+**Why use vectors?**
+
+Unlike raw data (text, images, etc.), vectors allow **quantitative comparison**. For instance, two similar sentences will have vectors that are “close” to each other in a high-dimensional space.
+
+Traditional databases are inefficient for managing high-dimensional vectors. Vector databases optimize this process by:
+
+1. **Efficient Storage**: Organize vectors for fast retrieval.
+2. **Similarity Search**: Implement **Approximate Nearest Neighbor (ANN)** algorithms, enabling:
+    - **Quick similarity comparisons**: Finding the closest vector (or vectors) to a query.
+    - **Example**: In a recommendation system, a user’s vector can help find similar items (movies, products, etc.).
+    - **Scalability**: Handle millions or billions of vectors efficiently.
+3. **Integrating AI Functions**:
+    - AI models rely on finding patterns and relationships between vectors. Vector databases enable:
+        - Recommendation engines.
+        - Semantic search (search by meaning, not exact text).
+        - Image or video similarity matching.
+
+**Example Algorithms: Approximate Nearest Neighbor (ANN)**
+
+Finding the nearest vectors in high-dimensional space is computationally expensive due to the **curse of dimensionality**. ANN algorithms make it practical by:
+
+1. Using **heuristics** instead of exact calculations.
+2. Organizing data with techniques like:
+    - **Hierarchical Navigable Small World (HNSW)** graphs.
+    - **Product quantization (PQ)**.
+
+These methods speed up searches while keeping accuracy high, making real-time AI applications feasible.
+
+**How Vector Databases Differ**
+
+**Versus Traditional Databases**:
+
+Traditional databases store structured, relational data and focus on exact matches or range queries.
+
+Vector databases focus on **approximation and similarity**, which are computationally expensive in traditional systems.
+
+**Versus In-Memory Tools**:
+
+Many AI applications used in-memory data structures (e.g., Python libraries like FAISS) for vector search. However, vector databases add persistence, scalability, and easier integration into production systems.
+
+**Popular Use Cases**
+
+- **Recommendation Systems**:
+    - **Example**: Suggesting similar movies based on user preferences encoded as vectors.
+- **Semantic Search**:
+    - Query: “Best Italian restaurants near me.”
+    - Instead of exact keyword matches, the database finds vectors representing similar concepts.
+- **Image and Video Search**:
+    - Example: "Find images visually similar to this one."
+- **Anomaly Detection**:
+    - Outliers in vector space can signal anomalies in financial transactions, health data, or system logs.
+
+**Object Stores**
+
+Let's assume we have a system that needs to store large files, for example photos or resumes. In such cases, object stores are the preferred choice of DB architecture. Object stores, such as Amazon S3 (Simple Storage Service), are a type of online/real-time database designed for storing and retrieving large amounts of unstructured data, typically in the form of objects or files.
+
+Object stores organize data as objects, and each object is stored as a file. File sizes can be as small as bytes or as large as terabytes. Therefore, object stores are highly scalable and are designed to handle large-scale data storage and retrieval efficiently.
+
+Object stores are a specialized type of database architecture designed to handle **large amounts of unstructured data**, such as images, videos, documents, and backups. They have become indispensable as data sizes and usage demands continue to grow exponentially.
+
+As more and more applications and industries are challenged with rapidly growing data requirements, object stores have become more and more ubiquitous, essential and important.
+
+**Key Characteristics of Object Stores**
+
+**Object-Based Storage**
+
+Data is stored as **objects**, which include:
+
+The **data** itself (e.g., the file or binary content).
+
+**Metadata** that describes the object (e.g., file type, creation date, or permissions).
+
+A **unique identifier** (like a key) that makes each object retrievable.
+
+**Scalability**
+
+Object stores are inherently **horizontally scalable**, meaning storage can grow indefinitely by adding more servers or nodes.
+
+This makes them ideal for applications that need to handle terabytes or petabytes of data, such as media libraries or cloud backups.
+
+**Access via APIs**
+
+Objects are accessed through **REST APIs** rather than traditional file systems or relational database queries.
+
+**Example**: Amazon S3 uses simple API calls like `GET`, `PUT`, and `DELETE` to interact with stored objects.
+
+**Cost Efficiency**:
+
+Object storage often operates on a **pay-as-you-use model**, making it cost-effective for storing large amounts of data long-term.
+
+Tiered storage (hot, warm, cold) allows users to balance cost with access speed.
+
+**Data Durability and Redundancy**:
+
+Object stores replicate data across multiple servers and geographic regions to ensure durability and prevent data loss.
+
+They are designed for **high availability**, ensuring stored objects are almost always accessible.
+
+**Why Object Stores Are Critical Today**
+
+**Handling Unstructured Data**:
+
+Most of today’s data (e.g., photos, videos, logs, IoT data) is **unstructured**, and object stores are optimized for such formats.
+
+Unlike traditional databases, which require structured schemas, object stores impose no schema, allowing flexibility in data storage.
+
+**Support for Modern Workloads**:
+
+Applications like machine learning, big data analytics, and content delivery rely on massive datasets stored efficiently.
+
+Object stores allow seamless access to these datasets at scale.
+
+**Global Accessibility**:
+
+Object storage systems are often distributed globally, allowing data to be accessed quickly from any location. This is crucial for applications like streaming services or global SaaS platforms.
+
+**Comparison to Other Storage Models**
+
+**Versus File Storage**:
+
+File storage uses a hierarchical structure (folders and files). It’s less scalable and harder to manage for very large datasets compared to object stores.
+
+Object storage’s flat structure with unique identifiers **eliminates directory complexity and enhances scalability**.
+
+**Versus Block Storage**:
+
+Block storage is ideal for structured workloads **requiring fast, low-latency performance** (e.g., databases or virtual machine disks).
+
+Object storage focuses on **large, unstructured datasets** and provides features like metadata and API-driven access.
+
+**Use Cases of Object Stores**
+
+**Media Storage and Delivery**:
+
+Platforms like Netflix or YouTube use object stores to manage vast libraries of videos and ensure high availability and quick delivery.
+
+**Backup and Archiving**:
+
+Object stores like Amazon S3 Glacier are tailored for cost-efficient long-term data archiving.
+
+**Big Data and AI**:
+
+Machine learning models rely on large datasets, often stored as objects, for training and inference.
+
+**Log Management and IoT**:
+
+Storing and analyzing logs, sensor data, or telemetry data from IoT devices.
+
+**OLTP Systems** (**Online Transaction Processing)**
+
+Most of the examples we’ve seen earlier (advertiser system, user metadata system) are examples of systems where:
+
+1. The **clients are end users**.
+2. Typically the clients want to read/update their information, which means the application queries and looks up a small number of records in the database at a time.
+3. The queries are real time and have low latency.
+4. The queries are interactive and depend on the latest state of the database.
+
+In general if your system has the above attributes, we call it an **OLTP** system. OLTP stands for **Online Transaction Processing**.
+
+**OLAP Systems (Online Analytics Processing)**
+
+Over time, the data we’ve collected has exponentially increased and now there is more and more need for extracting “insights” out of this data. As systems become intelligent and with the advent of AI, the need for data science and analytics has seen a boom. There has emerged an entire new use case of querying databases in order to get more insights rather than just serving the end user.
+
+To give an example, think about queries like “What is the total spend across all advertisers for this quarter” or “Which are the top categories of campaigns across which money has been spent”.
+
+Note that these queries:
+
+1. Typically query a lot of rows as opposed to OLTP systems where you only read and update a small set of rows.
+2. The clients of such queries are usually not end users but internal teams of companies trying to get some insights out of this data.
+3. The number of queries are much lower compared to OLTP systems that serve many more users, however each query is a lot larger, slower and compute intensive.
+4. These systems do not need to get the exact real time state of the database. A lag of a few minutes or even a few hours is usually okay for the use cases they serve.
+5. These queries are typically only read queries.
+
+Such systems are called **OLAP** systems. OLAP stands for **Online Analytics Processing.** You may have noticed the stark difference between the query patterns of OLAP and those explained in OLTP systems.
+
+**Question: Can the same database service both OLTP and OLAP queries?**
+
+Broadly, the answer to this is yes. If you have a relational database, you can always use the right “Where”, “Order by” and “Group By” clause in your SQL to get answers to even OLAP queries. However, this is possible only to some extent. Here are some of the limiting factors:
+
+1. OLAP queries in general query tons of rows and therefore consume a lot of the database resources (CPU, memory, etc). Sometimes this may lead to such queries overloading the system and therefore degrading the experience for OLTP queries used by end users. This leads to a **bad user experience**.
+2. It's possible that over time, the data size may become so large or the queries can get so complex that typical online databases may not be able to return the result within the stipulated time and with the resources they have. A lot of scaling work might have to be put in (**extra replicas, vertical scaling**) just to make those OLAP queries work which may have some negative side effects on the OLTP queries. This in turn might increase the cost of the system to unexpected levels.
+
+**Resource Contention**
+
+**OLTP Workloads**:
+
+Focus on many **small, fast, and frequent operations** like inserts, updates, and deletes.
+
+Typically require **low latency to serve end users efficiently**.
+
+**OLAP Workloads**:
+
+**Involve complex queries over large datasets**, such as aggregations, joins, and sorting, which are **resource-intensive**.
+
+**Consume significant CPU, memory, and I/O**, often monopolizing resources.
+
+When both workloads run on the same system, heavy OLAP queries can **monopolize** database resources, leading to:
+
+**Slower response times** for OLTP queries, degrading user experience.
+
+**Increased latency for critical user-facing operations**, which can cascade into system-wide performance bottlenecks.
+
+**Data Size and Complexity**
+
+As data grows, OLAP queries may need to process millions or billions of rows.
+
+**Relational databases** designed for OLTP:
+
+Are optimized for small-scale, row-based operations.
+
+May struggle to efficiently handle OLAP's large-scale, column-oriented analytical queries.
+
+**Scaling Challenges**:
+
+**Vertical scaling**: Adding more powerful hardware to handle OLAP queries might **improve performance temporarily but is costly and has diminishing returns**.
+
+**Replication**: Adding read replicas for OLAP can work but **increases complexity and costs. Also, replicas may lag behind, leading to outdated analytics**.
+
+**Query Optimization Challenges**
+
+- OLTP databases are **optimized for quick transactions**, often using row-based storage to quickly access specific records.
+- OLAP workloads benefit from **columnar storage**, where only the relevant columns are scanned for faster aggregation and analysis.
+
+**Mismatch**:
+
+- A database serving both workloads may not optimize effectively for either:
+    - OLAP queries may **execute slower due to row-based storage inefficiencies**.
+    - OLTP performance **may degrade due to the overhead of maintaining indexing or storage structures needed for analytics**.
+
+**Combining OLTP and OLAP in Practice**
+
+**Data Warehouses**
+
+It's evident that there is a new need for a different kind of storage system that allows and optimizes OLAP queries. Such a database that can be used for analytics queries is usually called a **data warehouse**. Here are some of the traits of a data warehouse.
+
+1. Data warehouses are typically **offline databases**. This means that they are not meant for real time interactive queries. They typically don't have the latest state of the database and therefore isn't the full source of truth when querying for the state of an individual entity in the database.
+2. Data warehouses are populated by copying over data from OLTP systems **in a batch or stream fashion**. 
+    
+    Data from multiple OLTP tables are then merged for analytic friendly queries.
+    
+3. The process of copy over multiple OLTP tables, cleaning the data and transforming the data into a query friendly schema is known as **ETL (Extract-Transform-Load)**.
+4. Data warehouses store enormous amounts of data, even historical data. This way they are better suited for analytic queries.
+5. Since data is copied over from online databases, data warehouse tables are often **read only.**
+    
+    Examples of such systems are Amazon Redshift, and Apache Hive.
+    
+
+Data warehouses are purpose-built systems for **OLAP (Online Analytical Processing)** queries, enabling organizations to derive insights from vast amounts of data. They cater specifically to analytical workloads and differ significantly from OLTP databases in design and function.
+
+**Offline Nature**
+
+Data warehouses are **not designed for real-time queries or transactional operations**.
+
+Instead, they are optimized for **complex, aggregate queries** over large datasets.
+
+As they do not have up-to-the-minute updates, they **aren’t the definitive source of truth** for current transactional data but **excel at providing historical and trend analyses**.
+
+**Data Integration via ETL (Extract-Transform-Load)**
+
+Data warehouses rely on **ETL pipelines** to populate their datasets:
+
+**Extract**: Data is fetched from OLTP systems and other sources.
+
+**Transform**: Data is cleaned, deduplicated, and reshaped into a schema optimized for analytical queries.
+
+**Load**: The transformed data is stored in the warehouse.
+
+This process allows data from multiple sources to be **merged and aligned**, creating a unified view for analytics.
+
+**Schema Design for Analytics**
+
+Data warehouses use schemas optimized for OLAP queries, such as **star schema** or **snowflake schema**:
+
+**Star Schema**: Central "fact" tables (e.g., sales data) connected to "dimension" tables (e.g., customers, regions).
+
+These designs reduce query complexity and enhance performance.
+
+**Storage of Historical Data**
+
+Unlike OLTP systems that only store current state data, warehouses often store **long-term historical records**.
+
+This enables trend analyses, forecasts, and comparisons over time, critical for decision-making.
+
+**Read-Only Data**
+
+Since data warehouses are not designed for transactional workloads, their datasets are typically **immutable** after being loaded.
+
+This read-only nature enhances performance for analytical queries by simplifying indexing and storage structures.
+
+**Why Are Data Warehouses Necessary?**
+
+**Separation of Workloads**:
+
+OLTP systems are not designed for heavy analytics, and running such queries can degrade their performance.
+
+Data warehouses offload analytics to a dedicated system, ensuring **OLTP performance remains unaffected**.
+
+**Optimization for Analytics**:
+
+Warehouses use **columnar storage** (**storing data column-by-column** rather than row-by-row), which accelerates aggregate operations like sum, average, and filtering across large datasets.
+
+**Indexing and partitioning** allow faster querying by organizing data for efficient retrieval.
+
+**Unified View Across Systems**:
+
+By aggregating data from multiple OLTP systems and external sources, data warehouses provide a **centralized platform** for analytics.
+
+**Examples of Data Warehouses**
+
+**Amazon Redshift**:
+
+A fully managed, petabyte-scale data warehouse on AWS.
+
+Supports massive parallel query execution for high-speed analytics.
+
+**Apache Hive**:
+
+An open-source data warehouse system built on top of Hadoop.
+
+Enables querying and managing large datasets stored in distributed file systems using SQL-like syntax.
+
+**Google BigQuery**:
+
+A serverless, highly scalable data warehouse designed for real-time analytics and machine learning.
+
+**In Practice: Why Not Use OLTP Directly?**
+
+- Running analytics on OLTP systems is like using a compact car to haul heavy cargo—it’s possible, but inefficient and potentially harmful.
+- Data warehouses, on the other hand, are like freight trucks: they’re specialized for handling heavy analytical loads, albeit at the cost of real-time interactivity.
+
+**Data Indexes in Relational Databases**
+
+**Motivation**
+
+Before we get into what an index is, let's start with an example to understand why this concept is even needed.
+
+Let's assume we have two tables in a relational database: Company and Employees. Here's what they look like:
+
+The company table stores information about the company. For example:
+
+| ID | Company Name | Company City | Company Country |
+| --- | --- | --- | --- |
+| 1 | Foo, Inc | San Francisco | US |
+| 2 | Bar, Inc | New York | US |
+| 3 | Foo Baz, Inc | London | UK |
+
+On the other hand, the Employees table contains information about all the employees of these given companies. For example:
+
+| ID | Company ID | First Name | Last Name |
+| --- | --- | --- | --- |
+| 1 | 1 | Emily | Mitchell |
+| 2 | 1 | Jordan | Turner |
+| 3 | 2 | Ethan | Foster |
+| 4 | 3 | Olivia | Reynolds |
+
+**Note that Company <-> Employee is a one-to-many relationship, which means that one company can have multiple employees, but an employee can be associated with only one company.** Usually, the way to model this in the database would be to have the company ID as a column of the employees table.
+
+Let's assume that the company table stores hundreds of thousands of records and every company on average has 10 employees. This would mean that the Employees table will have millions of records.
+
+With this in mind, say your system wants to query the list of all Employees belonging to company ID 2. A very simple way of doing that is to scan every row of the Employees table, match the company ID column with the value we want (2 in this case) and then return all the rows where we get a successful match. This will work fine, but the downside is that for every such query, we will have to scan the *entire* Employees table which means that just to get a few rows every single time, we will end up scanning millions of records every single time. This is a *huge performance bottleneck* for systems with a high query rate and large tables. This is where the concept of Indexes comes in.
+
+Now imagine you had some sort of data structure to help you speed up your query. For simplicity, imagine you had a hash map keyed by company ID, and whose values would be a list of all the employee IDs belonging to that company. If you had this data structure, retrieving all employees of a company would be much faster, more efficient and wouldn't require you to scan all the rows of the table. In practice, this is what an **index** is.
+
+To further explain this concept with another example, say you have a 500-page book on databases, and you want to look up the concept of joins. The fastest way to do that would be to look up the index of the book and search for the chapter on joins and directly go to that page, rather than manually scanning all the 500 pages of the book.
+
+**Definition of an Index**
+
+So now that we have a brief idea on why an Index is needed and what it does, let's try to make a slightly more formal definition of an index. We can say that **an** ****index is a data structure that provides a quick and efficient way to look up records in a database table based on the values in one or more columns***.* It works much like an index in a book, allowing you to quickly find the desired information without scanning the entire contents.
+
+https://www.youtube.com/watch?v=NZgfYbAmge8
+
+An index can be on one column or together on a set of columns. When a column is indexed, the database maintains a data structure in a way that reduces the need for full table scans. By doing so, the database can swiftly locate specific rows when a query filters by that indexed column. This efficiency results in quicker query responses and improved overall performance.
+
+**Trade-offs**
+
+**If indexes significantly speed up read queries, why not index all the columns?**
+
+The short answer is that there is no free lunch.
+
+- **Slower writes:** It is true that indexes can significantly improve reads. However, if you account for all DB operations, writes become slower because the index needs to be updated after every write. If there are many insert, update, or delete operations, or if the index itself is already large, adding indexes can introduce a bottleneck in the write operations.
+- **Increased memory:** The index data structure itself needs to consume memory. The more indexes you build and the larger your data is, the more memory you would need to store these indexes.
+
+**As a follow-up to the previous question, what are some common indexing mistakes people make in practice?**
+
+The answer is simple: not getting the right balance on what to index on. Many times, people either land up over-indexing or under-indexing.
+
+- **Over-indexing:** Indexing too many columns, even ones that are not going to be queried. This will have a high impact on write operations as well as potentially waste a lot of storage space.
+- **Under-indexing:** Indexing too little, in particular missing out on query patterns that often occur, and can stand to gain a lot of performance from an Index. This creates a poor read performance and missed optimization opportunities.
+
+**Okay, so then how does one get the right balance of what to index?**
+
+Getting the right balance and figuring out the right indexes is not a one time simple task. As time passes, the database changes not only in size, but in the kind of data it stores and the query patterns it services. If we want to maintain the right balance, the indexes need to evolve with the changing database as well.
+
+- **Analyze query patterns**: Before selecting an index, analyze the types of queries frequently executed in your database. Understand the SELECT, UPDATE, DELETE, and INSERT operations that are prevalent in your application. For queries involving specific filters or sorting, consider indexes on the columns used in the WHERE clause or ORDER BY clause. This can significantly improve the performance of these operations.
+- **Tracking cardinality**: Cardinality refers to the **uniqueness of values in a column**. High cardinality means that the column has mostly unique values, while low cardinality indicates a smaller set of unique values. Columns with **high cardinality,** such as primary keys or columns with mostly unique values, are good candidates for indexing. Indexing such columns enhances search performance. However, when indexing columns with **low cardinality**, it may result in inefficient use of index space. For instance, indexing a Boolean column might not be beneficial due to its limited unique values.
+- **Regular monitoring and tuning**: Regularly profile and analyze the performance of your database using monitoring tools. Identify slow queries, high-traffic tables, and areas for improvement. On the other hand, also keep track of index usage statistics to understand which indexes are actively contributing to query performance. You can throw out the ones not needed.
