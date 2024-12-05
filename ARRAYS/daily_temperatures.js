@@ -42,3 +42,4 @@ function dailyTemperatures(input) {
 console.log(dailyTemperatures([73, 74, 75, 71, 69, 72])); // Output: [1, 1, 0, 2, 1, 0]
 console.log(dailyTemperatures([30, 40, 50, 60])); // Output: [1, 1, 1, 0]
 console.log(dailyTemperatures([30, 20, 10])); // Output: [0, 0, 0]
+
