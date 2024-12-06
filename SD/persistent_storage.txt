@@ -1293,3 +1293,171 @@ Using a hash function on `Company ID`:
 - `f(3)` → Bucket 3
 
 The hash function directly maps a `Company ID` to a bucket, where the corresponding data is stored. This enables **amortized O(1)** time complexity for lookups.
+
+**Non-Relational Database Indexes and Inverted Indexes**
+
+**Can we index fields in non-relational databases too? Or are indexes only for relational databases?**
+
+Let's assume we have a non-relational database which stores metadata about a user. The structure looks like:
+
+```
+{
+  "User_ID_1": {
+    "First_name": "Foo",
+    "Last_name": "Bar",
+    "City": "San Francisco",
+    "Country": "USA",
+    "Profession": "Student",
+    ...
+  },
+  ...
+}
+
+```
+
+Now, if we wanted to query all the users living in London, a naive way of doing it would be to scan all the rows of the database and return the ones where the City value matches. Of course, in practice, this would lead to a huge performance bottleneck and wouldn’t allow the system to scale.
+
+Again, this is where indexes come into the picture. Indexes are also a feature of non-relational databases. We can build a hash map or another data structure that can look up rows based on an attribute value without a full database scan.
+
+In this example, having an index on the City attribute would mean that any query that would have a City clause or a city filter would not need a full database scan. Instead, the Index would have a mapping for every City to its corresponding rows in the database, thus making the read queries really fast.
+
+Indexes are used in non-relational databases to improve query performance by avoiding full scans. For example, indexing the `City` field allows quick lookup of users in a specific city without scanning all rows.
+
+Just like relational databases, non-relational database indexes can be:
+
+1. **Single-field Indexes**: Where the index is only on one field, just like we saw above.
+    1. **Single-field Indexes**: Indexes on one field, like `City`.
+2. **Compound indexes**: Where you can index on a set of fields. Just like we saw with composite indexes in relational databases, the order of the fields in the compound index matters. Data is grouped by the first field in the index and then by each subsequent field.
+    1. **Compound Indexes**: Indexes on multiple fields, such as `City` + `Country`, where the order matters for grouping data.
+
+**Inverted Indexes**
+
+Now, let’s understand how the use case of text searching might not be fully served with the indexes we’ve seen so far.
+
+Inverted indexes are designed for efficient text searching when traditional indexes fail to handle substring queries effectively.
+
+**Key Idea:**
+
+An inverted index breaks text (e.g., sentences) into individual terms (words) and maps each term to the rows (or documents) where it appears.
+
+Suppose we have a system that stores a small “about me” section of a user:
+
+| ID | About |
+| --- | --- |
+| 1 | Alice is a Software engineer from London |
+| 2 | Bob is a Doctor from Chicago |
+| 3 | Charlie is a data scientist from Seattle |
+| 4 | Dylan is an accountant from London |
+
+Now, let’s suppose we wanted to query all the rows where the word London appeared. A traditional single field index we’ve seen so far will ***not work.*** This is because for each row of the table, the entire string as a single unit is treated as the one value, the key of the index. Therefore,
+
+- For b-tree indexes, the entire sentence would be taken as a string and stored in the index in a sorted way.
+- For hash indexes, the entire sentence would be the “key” which when hashed would lead to the correct rows.
+
+In both cases, a query for an ***exact match*** of the *entire* string (”Alice is a Software engineer from London” in this case) would benefit from the index but not any arbitrary substring (like just the word “London”).
+
+With this structure, querying for “London” would give you all the Row IDs where that value occurs.
+
+A common real-life example of an inverted index is the index found at the end of a book. This index lists important words alphabetically and provides the page numbers where each word appears. Instead of reading the entire book to find a specific word, you can quickly locate the word and its associated page numbers in the index, making your search much more efficient.
+
+In practice, inverted indexes process text through many more phases than just splitting a sentence into words. Here are some of the phases:
+
+**Tokenization**: Splitting text into individual words or terms.
+
+**Normalization**: Converting terms to a standard format (e.g., lowercase).
+
+**Stemming**: Reducing words to their root form (e.g., "running" to "run").
+
+**Stop Word Removal**: Eliminating common words (e.g., "and", "the") that add little value.
+
+Some good examples of systems that provide text searching using inverted indexes are ElasticSearch and Apache Solr.
+
+**Scaling Database in Distributed Systems**
+
+The Need for Distributed Systems
+
+In today’s world where systems serve tens or even hundreds of millions of users, and deal with petabytes of data, the use of distributed systems has become inevitable. It’s almost impossible to have systems of such scale not having multiple machines involved in the storage and retrieval of data.
+
+Here are a few of the reasons we might want to distribute our database across multiple machines:
+
+ **Scalability**
+
+Our read or write traffic load may grow to be more than a single machine can handle.
+
+**Fault Tolerance**
+
+Machines go down all the time. If we want to make sure that our systems are still up and running and not falling victim to a single machine failing, we might want to have multiple copies of the database distributed across multiple machines. This will give us better availability and fault tolerance.
+
+**Latency**
+
+If people from all over the globe are using our systems, having servers located in just one location can compromise the performance and experience for people who are accessing the system from a far off geographical location. In such cases, having servers distributed in multiple locations across the globe can help maintain a high quality of service.
+
+**Vertical and Horizontal Scaling**
+
+Thus far, we learned about database fundamentals, query patterns and important concepts. Now, we will see the same concepts but in a distributed environment. We will see how the fundamentals we covered previously are executed in a distributed environment, where multiple machines are involved, and the challenges get tougher. Before we jump into some of the more detailed topics like sharding and replication, let’s quickly recap some significant concepts related to scaling. Recall the two types of scaling:
+
+**Vertical Scaling**
+
+Vertical scaling involves adding more resources (CPU, RAM, disk space) to an existing machine to handle increased load. This involves enhancing the capacity of the current machine by adding more powerful processors, more memory, or faster storage. This is also known as scaling up.
+
+The improvements are made to a single node rather than adding more nodes to the system. This is the first choice of scaling for traditional relational databases like MySQL, PostgreSQL, and Oracle.
+
+Vertical scaling is simpler to implement and manage, as it involves a single or few nodes. It also needs no modification to the application layer for handling distributed data. Finally, it is easier to maintain strong consistency and ACID properties because data still all lives together.
+
+On the other hand, usually there is an upper limit to resources that can be added to a single machine. Vertical scaling can help is scaling the system up to a certain limit, but after that horizontal scaling becomes a better choice. This is because with vertical scaling, we still have a single point of failure and adding more resources to a single node can become expensive when compared to adding more nodes.
+
+**Horizontal Scaling**
+
+Horizontal scaling involves adding more nodes to a distributed database system to handle increased load and storage requirements. Data is partitioned or sharded across different nodes. Each node holds a portion of the total data set. This is also known as scaling out.
+
+Horizontal scaling provides better fault tolerance and is more suitable for handling very large datasets and high throughput. This is a better choice of scaling after a point where vertical scaling becomes too expensive or unable to take the load any further. Non-relational databases do well with horizontal scaling, since data is usually key-value pairs that can easily be distributed across different machines without having to worry about joins and transactional support.
+
+However, distributing data across machines comes with some disadvantages. One of the biggest ones is the native ACID support that relational databases provide. With data distributed across nodes, providing transactional support becomes hard to achieve. Imagine having to lock rows across different machines and all the communication that needs to happen between the machines to make sure transactional support is provided. Even querying joins becomes tough because queries now have to join across different tables living on entirely different machines. This is why relational databases prefer vertical scaling over horizontal scaling.
+
+**Partitioning a.k.a Sharding**
+
+At one point when the data gets too large to fit onto a single machine, or the traffic gets too high for one machine to handle, it might become necessary to split the database across multiple machines. This process of splitting the data across multiple machines is known as **partitioning** or **sharding**, and each machine with data is referred to as a **shard**.
+
+Let's look at some ways we can partition our data across various machines.
+
+**Key Range Partitioning**
+
+One sharding strategy is to take your entire key range, split it and divide it across multiple shards.
+
+For example, let's assume we have a database of people names keyed by first name.
+
+Say we want to split this database across 2 shards. One example of key range partitioning would be putting names starting with A to M would on shard 1 and names starting with N to Z on shard 2.
+
+This means every query that query or update first names starting from A to M would hit shard 1, and the rest would hit shard 2.
+
+**Pros**
+
+This strategy works well because it's relatively easy to implement and the main server taking in requests and routing it to the right shard would have a relatively simple logic of routing requests. The request router needs to have the mapping table of the boundaries of every shard so that it can route the request to the right shard.
+
+Resharding is fairly straightforward. Say there are a lot more names from A-M and that shard fills up quickly. When this happens, we only need to migrate a small subset of the entire data to the new shard.
+
+Another advantage we get with key range sharding is that the data is still sorted by keys, which means that range queries become very efficient to do. For example, if our key was created date, then all the rows created on the same day would land up on the same shard. Therefore, queries like “provide all rows created yesterday” would only have to look up one shard (assuming all rows created on one day fit on one shard), rather than looking up all the shards.
+
+**Cons**
+
+However, this strategy has some disadvantages too. Based on what the data looks like, it's possible that some shards gets an unfairly high amount of traffic as compared to other shards. For example, if there are many more names starting with A than with Z, one particular shard will land up serving a disproportionately high amount of traffic. Similarly, with the example where created date is the key, every single insert on one day will have to be handled by one shard. This way we land up with ***“Hot Shards”*** and unbalanced traffic.
+
+**Hash Partitioning**
+
+The aim of sharding should be to evenly distribute traffic across all partitions. We saw how key range sharding might perform poorly with that. Another partitioning strategy that could help with this problem is partitioning by hash. In this strategy, instead of using the primary key, we pass the primary key through a hash function that returns a number. Then, we assign shards to serve a range of numbers.
+
+To continue with our example with names, let's assume we have a hash function that maps the following way:
+
+We see that the hash function returns an integer between 0 and 10, and now we can have 2 shards, shard 1 servicing rows with hashes between 0 and 5 and the other between 6 and 10.
+
+**Pros**
+
+With this strategy, we can more easily distribute traffic evenly. Even keys close together might have totally different hash values and land up on different shards, thereby balancing traffic a lot more fairly.
+
+For resharding, similar to term sharding, a new shard can pick up a subset of the hash range of the current shard, thereby only having to move those particular rows and not the entire table.
+
+The request router logic is also fairly simple, it has the mapping of every range to the shard that serves that range.
+
+**Cons**
+
+However, with this strategy, we lose storing keys in a sorted fashion. This means that queries might have to hit a lot more shards (in some cases, every get request would hit all shards) in order to get the result. In the example where the key was the created time, even rows created in a small span of time can land up on totally different shards. Therefore, a query like “give me all rows created yesterday” would hit all shards. This query pattern, where we need to query across all shards, is also known as ***scatter-gather.***
